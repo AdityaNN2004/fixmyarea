@@ -5,6 +5,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ReportIssue from './pages/ReportIssue';
+import IssueDetail from './pages/IssueDetail';
+
 export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -17,6 +19,7 @@ export default function App() {
           <Route path="/dashboard" element={<h1 className="p-8">Members only ✅</h1>} />
           <Route path="/report" element={<ReportIssue />} />
         </Route>
+        <Route path="/issues/:id" element={<IssueDetail />} />
       </Routes>
     </div>
   );

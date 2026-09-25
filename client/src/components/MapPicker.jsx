@@ -29,7 +29,8 @@ export default function MapPicker({ position, onPick, defaultCenter }) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <ClickHandler onPick={onPick} />
+                {/* Only attach click-handling in "picker" mode */}
+        {onPick && <ClickHandler onPick={onPick} />}
         {position && <Marker position={position} />}
       </MapContainer>
     </div>
