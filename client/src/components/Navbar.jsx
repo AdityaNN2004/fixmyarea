@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/authContext'; 
+import { useAuth } from '../context/authContext';
+
 export default function Navbar() {
   const { user, logout } = useAuth();
 
@@ -10,6 +11,10 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           {user ? (
             <>
+              <Link to="/report"
+                className="text-sm bg-emerald-600 text-white px-3 py-1.5 rounded-lg hover:bg-emerald-700">
+                + Report Issue
+              </Link>
               <span className="text-sm text-gray-600">Hi, {user.name}</span>
               <button onClick={logout}
                 className="text-sm border px-3 py-1 rounded-lg hover:bg-gray-50">
