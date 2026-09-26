@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://PASTE-RENDER-URL-HERE/api/:path*" },
+    { "source": "/api/:path*", "destination": "https://fixmyarea-ten.vercel.app" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
