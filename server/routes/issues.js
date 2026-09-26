@@ -3,8 +3,9 @@ import mongoose from 'mongoose';
 import Issue from '../models/Issue.js';
 import Comment from '../models/Comment.js';
 import StatusEvent from '../models/StatusEvent.js';
-import { requireAuth } from '../middleware/auth.js';
+// import { requireAuth } from '../middleware/auth.js';
 import { upload, uploadToCloudinary } from '../middleware/upload.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -138,6 +139,39 @@ router.post('/:id/comments', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('❌ Comment failed:', err);
     res.status(500).json({ message: 'Failed to add comment' });
+  }
+});
+
+const VALID_STATUSES = ['acknowledged', 'in_progress', 'resolved'];
+
+// PATCH /api/issues/:id/status — admin moves an issue through the pipeline
+router.patch('/:id/status', requireAuth, requireRole('admin'), async (req, res) => {
+  try {
+    const { status, note } = req.body;
+    if (!VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ message: `status must be one of: ${VALID_STATUSES.join(', ')}` });
+    }
+
+    const issue = await Issue.findById(req.params.id);
+    if (!issue) return res.status(404).json({ message: 'Issue not found' });
+    if (issue.status === 'resolved') return res.status(400).json({ message: 'Resolved issues are closed' });
+    if (issue.status === status) return res.status(400).json({ message: `Issue is already ${status}` });
+
+    issue.status = status;
+    await issue.save();
+
+    // The whole point of the StatusEvent model: the public timeline grows
+    await StatusEvent.create({
+      issue: issue._id,
+      status,
+      note: note?.trim() || undefined,
+      changedBy: req.user.id,
+    });
+
+    res.json({ issue });
+  } catch (err) {
+    console.error('❌ Status update failed:', err);
+    res.status(500).json({ message: 'Failed to update status' });
   }
 });
 

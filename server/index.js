@@ -7,7 +7,7 @@ import { connectDB } from './config/db.js';
 import authRoutes from './routes/auth.js';
 import issueRoutes from './routes/issues.js';
 // dotenv.config();
-
+import adminRoutes from './routes/admin.js';   // with the other route imports
 const app = express();
 
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
@@ -22,7 +22,7 @@ app.get('/api/health', (req, res) => {
     time: new Date().toISOString(),
   });
 });
-
+app.use('/api/admin', adminRoutes);            // with the other app.use route lines
 app.use('/api/auth', authRoutes);
 app.use('/api/issues', issueRoutes);          
 const PORT = process.env.PORT || 5000;

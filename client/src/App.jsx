@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ReportIssue from './pages/ReportIssue';
 import IssueDetail from './pages/IssueDetail';
+import AdminRoute from './components/AdminRoute';       // imports
+import AdminDashboard from './pages/AdminDashboard';
 
 export default function App() {
   return (
@@ -15,6 +17,9 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+                <Route element={<AdminRoute />}>                {/* own block, outside ProtectedRoute */}
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Route>
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<h1 className="p-8">Members only ✅</h1>} />
           <Route path="/report" element={<ReportIssue />} />

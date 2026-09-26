@@ -31,6 +31,9 @@ export default function IssueDetail() {
   const [upvoteCount, setUpvoteCount] = useState(0);
   const [commentText, setCommentText] = useState('');
   const [posting, setPosting] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
+  const [statusNote, setStatusNote] = useState('');
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   // useCallback: stable function identity → safe as a useEffect dependency
   const loadIssue = useCallback(() => {
@@ -72,7 +75,19 @@ export default function IssueDetail() {
       setPosting(false);
     }
   };
-
+  const applyStatus = async () => {
+  if (!newStatus) return;
+  setUpdatingStatus(true);
+  try {
+    await api.patch(`/issues/${id}/status`, { status: newStatus, note: statusNote });
+    setNewStatus(''); setStatusNote('');
+    loadIssue(); // refetch → status badge + timeline both refresh
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to update status');
+  } finally {
+    setUpdatingStatus(false);
+  }
+};
   if (error) return <p className="max-w-2xl mx-auto mt-16 text-center text-red-600">{error}</p>;
   if (!data) return <p className="text-center text-gray-500 py-16">Loading…</p>;
 
@@ -100,7 +115,30 @@ export default function IssueDetail() {
           <p className="text-sm text-gray-500 mt-1">
             {issue.address || 'Pinned on map'} · {new Date(issue.createdAt).toLocaleDateString()} · by {issue.reportedBy?.name}
           </p>
-
+          {user?.role === 'admin' && (
+  <div className="mt-6 border-2 border-emerald-200 bg-emerald-50/50 rounded-xl p-4">
+    <h3 className="font-semibold text-emerald-800">🛡️ Admin actions</h3>
+    <p className="text-xs text-gray-600 mt-1">
+      Status changes are public — they appear on this issue's timeline with your name.
+    </p>
+        <div className="flex flex-wrap gap-2 mt-3">
+          <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}
+            className="border rounded-lg px-3 py-2 text-sm bg-white">
+            <option value="">Choose next status…</option>
+            <option value="acknowledged">Acknowledged</option>
+            <option value="in_progress">In progress</option>
+            <option value="resolved">Resolved</option>
+          </select>
+          <input value={statusNote} onChange={(e) => setStatusNote(e.target.value)}
+            placeholder="Note (optional) — e.g. 'Crew dispatched'"
+            className="flex-1 min-w-48 border rounded-lg px-3 py-2 text-sm" />
+          <button onClick={applyStatus} disabled={!newStatus || updatingStatus}
+            className="bg-emerald-600 text-white px-4 rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50">
+            {updatingStatus ? 'Updating…' : 'Update status'}
+          </button>
+        </div>
+      </div>
+    )}
           <button onClick={handleUpvote}
             className={`mt-4 flex items-center gap-2 border rounded-lg px-3 py-1.5 text-sm transition-colors ${
               upvoted ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'hover:bg-gray-50'
